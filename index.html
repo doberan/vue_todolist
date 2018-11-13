@@ -8,29 +8,56 @@
   <body>
     <div id="app">
       <ul>
-        <li v-for="list in lists">{{ list.text }}</li>
+        <li v-for="list in lists">
+          <span>{{ list.text }}</span>
+          <span>{{ list.date }}</span>
+          <span><input type="checkbox" name="remove" :remove-id="list.id" /></span>
+        </li>
         <li> {{ text }}</li>
       </ul>
       <input type="text" name="" v-model="text">
-      <button name="submit" value="登録" v-on:click="submit" />
+      <button name="submit" v-on:click="submit" >登録</button>
+      <button name="remove" v-on:click="remove" >削除</button>
     </div>
     <script type="text/javascript">
       var app = new Vue({
         el: "#app",
         data: {
           text: "todo入力してください。",
-          lists: [
-            { text: "aa" }
-          ]
+          lists: [],
+          removeList: []
         },
         methods: {
           submit: function(){
-            this.lists.unshift({"text": this.text});
+            let date = sampleDate(new Date(), "YYYY/MM/DD hh:mm");
+            this.lists.unshift({"id":(localStorage.length+1), "text": this.text, "date": date});
+            console.log(date);
             console.log(this.text);
+            localStorage.setItem(date, this.text);
             this.text = "todo入力してください";
+          },
+          remove: function(e){
+            this.lists[e.target.remove-id].remove;
+            
           }
         }
       })
-    </script>    
+      
+      function init(){
+        var keys = [];
+        for (var i = localStorage.length - 1; i >= 0; --i) {
+          app.lists.unshift({"id": i, "text": localStorage.getItem(localStorage.key(i)), "date": localStorage.key(i)});
+        }
+      }
+      function sampleDate(date, format) {
+          format = format.replace(/YYYY/, date.getFullYear());
+          format = format.replace(/MM/, date.getMonth() + 1);
+          format = format.replace(/DD/, date.getDate());
+          format = format.replace(/hh/, date.getHours());
+          format = format.replace(/mm/, date.getMinutes());     
+          return format;
+      }
+      init();
+    </script>
   </body>
 </html>
