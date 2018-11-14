@@ -4,18 +4,28 @@
     <meta charset="utf-8">
     <title>todolist</title>
     <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+    <style media="screen">
+        td,th{
+          border: solid 1px #000;
+          padding: 10px;
+          text-align: center;
+        }
+    </style>
   </head>
   <body>
     <div id="app">
       <table>
+        <tr><th v-for="label in tableLabel">{{label}}</th></tr>
         <tr v-for="(list, index) in lists">
           <td>{{ list.text }}</td>
           <td>{{ list.date }}</td>
           <td><input type="checkbox" :id="index" :name="index" :value="index" v-model="removeList" /></td>
         </tr>
-        <tr><td>todo入力　＝　 {{ text }}</td></tr>
-        <tr><td v-for> 削除キー　＝　{{ removeList  }}</td></tr>
       </table>
+      <div>
+        <p>内容入力　　　　＝　 {{ text }}</p>
+        <p v-for="val in removeList"> 　　削除　　　　＝　{{ lists[removeList].text  }}<br></p>
+      </div>
       <input type="text" name="" v-model="text">
       <button name="submit" v-on:click="submit" >登録</button>
       <button name="remove" v-on:click="remove" >削除</button>
@@ -24,6 +34,11 @@
       var app = new Vue({
         el: "#app",
         data: {
+          tableLabel: [
+            "内容",
+            "更新時間",
+            "削除"
+          ],
           text: "",
           lists: [],
           removeList: []
