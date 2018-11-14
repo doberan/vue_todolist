@@ -45,6 +45,7 @@
                 if(this.removeList[i] === j){
                   localStorage.removeItem(this.lists[j].date);
                   this.lists.splice(this.lists[j], 1);
+                  this.removeList.splice(i, 1);
                 }
               }
             }
