@@ -7,14 +7,15 @@
   </head>
   <body>
     <div id="app">
-      <ul>
-        <li v-for="list in lists">
-          <span>{{ list.text }}</span>
-          <span>{{ list.date }}</span>
-          <span><input type="checkbox" name="remove" :remove-id="list.id" /></span>
-        </li>
-        <li> {{ text }}</li>
-      </ul>
+      <table>
+        <tr v-for="(list, index) in lists">
+          <td>{{ list.text }}</td>
+          <td>{{ list.date }}</td>
+          <td><input type="checkbox" :id="index" :name="index" :value="index" v-model="removeList" /></td>
+        </tr>
+        <tr><td>todo入力　＝　 {{ text }}</td></tr>
+        <tr><td v-for> 削除キー　＝　{{ removeList  }}</td></tr>
+      </table>
       <input type="text" name="" v-model="text">
       <button name="submit" v-on:click="submit" >登録</button>
       <button name="remove" v-on:click="remove" >削除</button>
@@ -23,22 +24,30 @@
       var app = new Vue({
         el: "#app",
         data: {
-          text: "todo入力してください。",
+          text: "",
           lists: [],
           removeList: []
         },
         methods: {
           submit: function(){
             let date = sampleDate(new Date(), "YYYY/MM/DD hh:mm");
-            this.lists.unshift({"id":(localStorage.length+1), "text": this.text, "date": date});
+            this.lists.unshift({"text": this.text, "date": date});
             console.log(date);
             console.log(this.text);
             localStorage.setItem(date, this.text);
-            this.text = "todo入力してください";
+            this.text = "";
           },
-          remove: function(e){
-            this.lists[e.target.remove-id].remove;
-            
+          remove: function(){
+            // this.lists[e.target.remove-id].remove;
+            for(var i = 0; i < this.removeList.length; ++i){
+              console.log(this.removeList[i]);
+              for(var j = 0; j < this.lists.length; ++j){
+                if(this.removeList[i] === j){
+                  localStorage.removeItem(this.lists[j].date);
+                  this.lists.splice(this.lists[j], 1);
+                }
+              }
+            }
           }
         }
       })
