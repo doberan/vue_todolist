@@ -10,6 +10,15 @@
           padding: 10px;
           text-align: center;
         }
+        .left{
+          text-align: left;
+        }
+        .right{
+          text-align: right;
+        }
+        .center{
+          text-align: center;
+        }
     </style>
   </head>
   <body>
@@ -17,40 +26,67 @@
       <table>
         <tr><th v-for="label in tableLabel">{{label}}</th></tr>
         <tr v-for="(list, index) in lists">
-          <td>{{ list.text }}</td>
-          <td>{{ list.date }}</td>
+          <td class="center">{{ index+1 }}</td>
+          <td class="left">{{ list.text }}</td>
+          <td class="center">{{list.startDate}}</td>
+          <td class="center">{{list.lastDate}}</td>
+          <td class="center">{{ list.date }}</td>
+          <td><input type="checkbox" :id="index" :name="index" :value="index" v-model="saccessList" /></td>
           <td><input type="checkbox" :id="index" :name="index" :value="index" v-model="removeList" /></td>
         </tr>
       </table>
       <div>
         <p>内容入力　　　　＝　 {{ text }}</p>
-        <p v-for="val in removeList"> 　　削除　　　　＝　{{ lists[removeList].text  }}<br></p>
+        <p>開始日　　　　　＝　 {{ startDate }}</p>
+        <p>終了予定日　　　＝　 {{ lastDate }}</p>
+        <p v-for="val in saccessList"> 　　完了　　　　＝　{{ lists[val].text  }}<br></p>
+        <p v-for="val in removeList"> 　　削除　　　　＝　{{ lists[val].text  }}<br></p>
       </div>
-      <input type="text" name="" v-model="text">
-      <button name="submit" v-on:click="submit" >登録</button>
-      <button name="remove" v-on:click="remove" >削除</button>
+      <div>
+        <p>
+          <label>内容</label>
+          <input type="text" name="" v-model="text">
+        </p>
+        <p>
+          <label>開始日</label>
+          <input type="date" name="" v-model="startDate">
+        </p>
+        <p>
+          <label>終了予定日</label>
+          <input type="date" name="" v-model="lastDate">
+        </p>
+        <button name="submit" v-on:click="submit" >登録</button>
+        <button name="remove" v-on:click="remove" >削除</button>
+      </div>
     </div>
     <script type="text/javascript">
       var app = new Vue({
         el: "#app",
         data: {
           tableLabel: [
+            "No",
             "内容",
+            "開始日",
+            "終了予定日",
             "更新時間",
+            "完了",
             "削除"
           ],
           text: "",
+          startDate: "",
+          lastDate: "",
           lists: [],
+          saccessList: [],
           removeList: []
         },
         methods: {
           submit: function(){
             let date = sampleDate(new Date(), "YYYY/MM/DD hh:mm");
-            this.lists.unshift({"text": this.text, "date": date});
+            this.lists.unshift({"id": (localStorage.length+1), "text": this.text, "date": date, "startDate": this.startDate, "lastDate": this.lastDate});
             console.log(date);
             console.log(this.text);
-            localStorage.setItem(date, this.text);
-            this.text = "";
+            localStorage.setItem((localStorage.length+1), '{"text": ' + this.text + ', "date": ' + date + ', "startDate":' + this.startDate + ', "lastDate":' +  this.lastDate + '}');
+            this.text = this.startDate = this.lastDate = "";
           },
           remove: function(){
             // this.lists[e.target.remove-id].remove;
@@ -58,7 +94,7 @@
               console.log(this.removeList[i]);
               for(var j = 0; j < this.lists.length; ++j){
                 if(this.removeList[i] === j){
-                  localStorage.removeItem(this.lists[j].date);
+                  localStorage.removeItem(this.lists[j].id);
                   this.lists.splice(this.lists[j], 1);
                   this.removeList.splice(i, 1);
                 }
@@ -71,7 +107,9 @@
       function init(){
         var keys = [];
         for (var i = localStorage.length - 1; i >= 0; --i) {
-          app.lists.unshift({"id": i, "text": localStorage.getItem(localStorage.key(i)), "date": localStorage.key(i)});
+          let item = localStorage.getItem(localStorage.key(i));
+          console.log("item : " + item);
+          app.lists.unshift({"id": localStorage.key(i), "text": item.text, "date": item.date, "startDate": item.startDate, "lastDate": item.lastDate});
         }
       }
       function sampleDate(date, format) {
