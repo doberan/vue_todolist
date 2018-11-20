@@ -5,10 +5,29 @@
     <title>todolist</title>
     <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
     <style media="screen">
+        #app{
+          width: 80%;
+          margin: 0 auto;
+        }
+        table{
+          width: 100%;
+        }
+        caption{
+          font-weight: bold;
+        }
         td,th{
           border: solid 1px #000;
-          padding: 10px;
           text-align: center;
+        }
+        h2,p{
+          padding: 0;
+          margin:0;
+        }
+        .float-left{
+          float: left;
+        }
+        .float-right{
+          float: right;
         }
         .left{
           text-align: left;
@@ -19,30 +38,40 @@
         .center{
           text-align: center;
         }
+        .view-text-box, .create-todo-box{
+          display:inline-grid;
+          width: 45%;
+          margin: 0;
+          padding: 0;
+          border: solid 1px #444;
+        }
     </style>
   </head>
   <body>
     <div id="app">
       <table>
+        <caption><h2>ToDo</h2></caption>
         <tr><th v-for="label in tableLabel">{{label}}</th></tr>
         <tr v-for="(list, index) in lists">
-          <td class="center">{{ index+1 }}</td>
+          <td class="center">{{ list.id }}</td>
           <td class="left">{{ list.text }}</td>
           <td class="center">{{list.startDate}}</td>
           <td class="center">{{list.lastDate}}</td>
           <td class="center">{{ list.date }}</td>
-          <td><input type="checkbox" :id="index" :name="index" :value="index" v-model="saccessList" /></td>
-          <td><input type="checkbox" :id="index" :name="index" :value="index" v-model="removeList" /></td>
+          <td><input type="checkbox" :id="list.id" :name="list.id" :value="list.id" v-model="saccessList" /></td>
+          <td><input type="checkbox" :id="list.id" :name="list.id" :value="list.id" v-model="removeList" /></td>
         </tr>
       </table>
-      <div>
+      <div class="view-text-box float-left">
+        <h2>内容確認</h2>
         <p>内容入力　　　　＝　 {{ text }}</p>
         <p>開始日　　　　　＝　 {{ startDate }}</p>
         <p>終了予定日　　　＝　 {{ lastDate }}</p>
-        <p v-for="val in saccessList"> 　　完了　　　　＝　{{ lists[val].text  }}<br></p>
-        <p v-for="val in removeList"> 　　削除　　　　＝　{{ lists[val].text  }}<br></p>
+        <p> 　　完了　　　　＝　<span v-for="val in saccessList"  >{{ val + " , "  }}</span><br></p>
+        <p> 　　削除　　　　＝　<span v-for="val in removeList">{{ val + " , "  }}</span><br></p>
       </div>
-      <div>
+      <div class="create-todo-box float-right">
+        <h2>ToDo作成</h2>
         <p>
           <label>内容</label>
           <input type="text" name="" v-model="text">
@@ -85,7 +114,8 @@
             this.lists.unshift({"id": (localStorage.length+1), "text": this.text, "date": date, "startDate": this.startDate, "lastDate": this.lastDate});
             console.log(date);
             console.log(this.text);
-            localStorage.setItem((localStorage.length+1), '{"text": ' + this.text + ', "date": ' + date + ', "startDate":' + this.startDate + ', "lastDate":' +  this.lastDate + '}');
+            // {"text": "aa","date": "2018/11/19 13:36","startDate": "2018-11-06","lastDate": "2018-11-07"}
+            localStorage.setItem((localStorage.length+1), '{"text": "' + this.text + '", "date":  "' + date + '", "startDate": "' + this.startDate + '", "lastDate": "' +  this.lastDate + '"}');
             this.text = this.startDate = this.lastDate = "";
           },
           remove: function(){
@@ -93,7 +123,7 @@
             for(var i = 0; i < this.removeList.length; ++i){
               console.log(this.removeList[i]);
               for(var j = 0; j < this.lists.length; ++j){
-                if(this.removeList[i] === j){
+                if(this.removeList[i] === this.lists[j].id){
                   localStorage.removeItem(this.lists[j].id);
                   this.lists.splice(this.lists[j], 1);
                   this.removeList.splice(i, 1);
@@ -108,17 +138,25 @@
         var keys = [];
         for (var i = localStorage.length - 1; i >= 0; --i) {
           let item = localStorage.getItem(localStorage.key(i));
+          let json = JSON.parse(item);
           console.log("item : " + item);
-          app.lists.unshift({"id": localStorage.key(i), "text": item.text, "date": item.date, "startDate": item.startDate, "lastDate": item.lastDate});
+          console.log("item.date : " + json.text);
+          app.lists.unshift({
+            "id": localStorage.key(i),
+            "text": json.text,
+            "date": json.date,
+            "startDate": json.startDate,
+            "lastDate": json.lastDate
+          });
         }
       }
       function sampleDate(date, format) {
-          format = format.replace(/YYYY/, date.getFullYear());
-          format = format.replace(/MM/, date.getMonth() + 1);
-          format = format.replace(/DD/, date.getDate());
-          format = format.replace(/hh/, date.getHours());
-          format = format.replace(/mm/, date.getMinutes());     
-          return format;
+        format = format.replace(/YYYY/, ((date.getFullYear() >= 0 && date.getFullYear() <= 9) ? ("0" + date.getFullYear()) : date.getFullYear()));
+        format = format.replace(/MM/, date.getMonth() + 1);
+        format = format.replace(/DD/, ((date.getDate() >= 0 && date.getDate() <= 9) ? ("0" + date.getDate()) : date.getDate()));
+        format = format.replace(/hh/, date.getHours());
+        format = format.replace(/mm/, date.getMinutes());     
+        return format;
       }
       init();
     </script>
