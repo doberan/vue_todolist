@@ -38,11 +38,15 @@
         .center{
           text-align: center;
         }
+        .todo-input-box{
+          width: 100%;
+          display:table;
+          table-layout: fixed;        
+        }
         .view-text-box, .create-todo-box{
-          display:inline-grid;
-          width: 45%;
-          margin: 0;
-          padding: 0;
+          display: table-cell;
+          vertical-align: middle;
+          width: 50%;
           border: solid 1px #444;
         }
     </style>
@@ -58,34 +62,36 @@
           <td class="center">{{list.startDate}}</td>
           <td class="center">{{list.lastDate}}</td>
           <td class="center">{{ list.date }}</td>
-          <td><input type="checkbox" :id="list.id" :name="list.id" :value="list.id" v-model="saccessList" /></td>
+          <td><input type="checkbox" :id="list.id" :name="list.id" :value="list.id" v-model="successList" /></td>
           <td><input type="checkbox" :id="list.id" :name="list.id" :value="list.id" v-model="removeList" /></td>
         </tr>
       </table>
-      <div class="view-text-box float-left">
-        <h2>内容確認</h2>
-        <p>内容入力　　　　＝　 {{ text }}</p>
-        <p>開始日　　　　　＝　 {{ startDate }}</p>
-        <p>終了予定日　　　＝　 {{ lastDate }}</p>
-        <p> 　　完了　　　　＝　<span v-for="val in saccessList"  >{{ val + " , "  }}</span><br></p>
-        <p> 　　削除　　　　＝　<span v-for="val in removeList">{{ val + " , "  }}</span><br></p>
-      </div>
-      <div class="create-todo-box float-right">
-        <h2>ToDo作成</h2>
-        <p>
-          <label>内容</label>
-          <input type="text" name="" v-model="text">
-        </p>
-        <p>
-          <label>開始日</label>
-          <input type="date" name="" v-model="startDate">
-        </p>
-        <p>
-          <label>終了予定日</label>
-          <input type="date" name="" v-model="lastDate">
-        </p>
-        <button name="submit" v-on:click="submit" >登録</button>
-        <button name="remove" v-on:click="remove" >削除</button>
+      <div class="todo-input-box">
+        <div class="view-text-box ">
+          <h2>内容確認</h2>
+          <p>内容入力　　　　＝　 {{ text }}</p>
+          <p>開始日　　　　　＝　 {{ startDate }}</p>
+          <p>終了予定日　　　＝　 {{ lastDate }}</p>
+          <p> 　　完了　　　　＝　<span v-for="val in successList"  >{{ val + " , "  }}</span><br></p>
+          <p> 　　削除　　　　＝　<span v-for="val in removeList">{{ val + " , "  }}</span><br></p>
+        </div>
+        <div class="create-todo-box">
+          <h2>ToDo作成</h2>
+          <p>
+            <label>内容</label>
+            <input type="text" name="" v-model="text">
+          </p>
+          <p>
+            <label>開始日</label>
+            <input type="date" name="" v-model="startDate">
+          </p>
+          <p>
+            <label>終了予定日</label>
+            <input type="date" name="" v-model="lastDate">
+          </p>
+          <button name="submit" v-on:click="submit" >登録</button>
+          <button name="remove" v-on:click="remove" >削除</button>
+        </div>
       </div>
     </div>
     <script type="text/javascript">
@@ -105,8 +111,29 @@
           startDate: "",
           lastDate: "",
           lists: [],
-          saccessList: [],
+          successList: [],
           removeList: []
+        },
+        watch: {
+          successList: {
+            handler: function(val, oldVal){
+              console.log("val = " + val);
+              localStorage.removeItem("success");
+              var output = '{"id": ["';
+              for(var i = 0; i <= this.successList.length-1; i++){
+                console.log("this.successList["+i+"] = " + this.successList[i]);
+                console.log("successList.length = " + this.successList.length);
+                console.log("i = " + i);
+                output += this.successList[i];
+                if(i != (this.successList.length - 1)){
+                  output += '", "';  
+                }
+              }
+              output += '"]}';
+              console.log("output = " + output);
+              localStorage.setItem(("success"),  output);
+            }
+          }
         },
         methods: {
           submit: function(){
@@ -141,13 +168,18 @@
           let json = JSON.parse(item);
           console.log("item : " + item);
           console.log("item.date : " + json.text);
-          app.lists.unshift({
-            "id": localStorage.key(i),
-            "text": json.text,
-            "date": json.date,
-            "startDate": json.startDate,
-            "lastDate": json.lastDate
-          });
+          if(localStorage.key(i) != "success"){
+            app.lists.unshift({
+              "id": localStorage.key(i),
+              "text": json.text,
+              "date": json.date,
+              "startDate": json.startDate,
+              "lastDate": json.lastDate
+            });
+          }else{
+            console.log("json.id = " + json.id);
+            app.successList = json.id;
+          }
         }
       }
       function sampleDate(date, format) {
